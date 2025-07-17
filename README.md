@@ -17,7 +17,7 @@
 
 ## 📋 Script Loadstring
 ```lua
-loadstring(table.concat({"loa","dstr","ing(","gam","e:Ht","tpGet(","'ht","tps:/","/raw.","github","usercontent", ".com/Bre","adido/C","odecoat/r","efs/head","s/main/l","ooder.lu","au')()"}))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Breadido/Codecoat/refs/heads/main/looder.luau"))()
 ```
 
 ## 🌐 Community
