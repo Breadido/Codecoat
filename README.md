@@ -1,6 +1,6 @@
 # Codecoat
 > **Lightweight. Powerful. Free.** 
-<img width="510" height="395" alt="Capture" src="https://github.com/user-attachments/assets/25743b9a-a230-4dee-9380-6fbe779a445d" />
+<img width="504" height="392" alt="image" src="https://github.com/user-attachments/assets/31319f44-ab4e-4dd5-b180-933770411684" />
 
 ## 🔍 What is Codecoat?
 
