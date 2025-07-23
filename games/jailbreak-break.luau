@@ -570,16 +570,15 @@ end)
 task.spawn(function()
 	-- Hooking
     hookfunction(getcallbackvalue(game:GetService("ReplicatedStorage").HawkeyeRemoteFunction, "OnClientInvoke"), function() end)
-	setupvalue(jbremote.FireServer, 1, function(key,...) -- anti cheat bipasss
-		task.wait()
+	local old
+	old = hookfunction(Instance.new("RemoteEvent").FireServer, function(...)
 		local args = {...}
-		if #args == 2 and debug.traceback():find("LocalScript:1346") then
+		if #args == 4 and debug.traceback():find("LocalScript:1349") then
 			getgenv().acbypassed = true
-			return 
+			return
 		end
-		return oldjbremote(key, ...)
+		return old(...)
 	end)
-
 	client.simulatedphysicsprojectile.HitTargetWithSpeed = (function(...)
 		local args = {...}
 		if configs.combat.forcefieldnomiss and args[3] == 75 then
