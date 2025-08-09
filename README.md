@@ -12,7 +12,8 @@
 - 🚀 **Expandable to support more games in the future**
 
 ## 🎮 Currently Supported Games
-- 🚓 **Jailbreak**  
+- 🚓 **Jailbreak**
+- 🔫 **Hypershot**
 - 🚓 **Car Crushers 2** - *WIP🚧*
 
 ## 📋 Script Loadstring
