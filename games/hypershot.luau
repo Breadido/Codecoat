@@ -2260,14 +2260,16 @@ sec.CreateToggle({
 	Default = false;
 	Callback = (function(a)
 		config.awalkspeed = a
-		if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
-			local humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-			humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-				if config.awalkspeed then
-					humanoid.WalkSpeed = config.walkspeed
-				end
-			end)
-		end
+		pcall(function()
+			if game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+				local humanoid = game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+				humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+					if config.awalkspeed then
+						humanoid.WalkSpeed = config.walkspeed
+					end
+				end)
+			end
+		end)
 	end)
 })
 
