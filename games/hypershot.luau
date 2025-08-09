@@ -2076,17 +2076,6 @@ loop.enemies = (function()
 end)
 
 task.spawn(function()
-    -- old = hookfunction(client.gameui.GetMousePos, function(...)
-    --     local nearest = client.getNearestToCursor()
-    --     print(nearest)
-    --     if config.silentaimenabled and nearest then
-	-- 		--pcall(function()
-    --         	return nearest.Position
-	-- 		--end)
-    --     end
-    --     return old(...)
-    -- end)
-
 	client.gameui.GetMousePos = (function(...)
 		local nearest = client.getNearestToCursor()
         print(nearest)
@@ -2123,18 +2112,6 @@ task.spawn(function()
 			end
 		end)
 	end)
-
-	-- game:GetService("Players").LocalPlayer.PlayerGui.ChildAdded:Connect(function(a)
-	-- 	if a.name == "MainGui" then
-	-- 		task.wait(0.1)
-	-- 		local melee = require(game:GetService("Players").LocalPlayer.PlayerGui.MainGui.MainLocal.Tools.Tool.Melee)
-	-- 		client.oldfunction.CanUseMelee = melee.CanUse
-	-- 		melee.CanUse = (function(...)
-	-- 			return config.noknifecooldown and 
-	-- 		end)
-	-- 	end
-	-- end)
-
 end)
 --[[
 -- no abilities cooldown but it only works on some few abilities soo i'm not adding these
