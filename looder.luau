@@ -1,2 +1,14 @@
- -- only one game is supported right now. real loader coming soon
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Breadido/Codecoat/refs/heads/main/games/jailbreak-break.luau'))()
+local base = "https://raw.githubusercontent.com/Breadido/Codecoat/main/"
+local uh = {
+    [606849621] = "games/jailbreak-break.luau",
+    [17516596118] = "games/hypershot.lua"
+}
+local file = uh[game.PlaceId]
+local ok, huh = pcall(function()
+    return loadstring(game:HttpGet(base..file))()
+end)
+if ok then
+    print("[Codecoat] Loaded:", file)
+else
+    warn("[Codecoat] Failed:", huh)
+end
