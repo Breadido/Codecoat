@@ -1,3 +1,10 @@
+-- i recommend yall to not seeing this shitty source, because most of these stuff is from old jb script which at the time still learning luau soo everything here is 1000% guranteed full of masterpiece of shitfest code
+local repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
+local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
+local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+local Options = Library.Options
+local Toggles = Library.Toggles
 
 local MainESP, CullingSystem = loadstring(game:HttpGet('https://raw.githubusercontent.com/Breadido/Main/refs/heads/master/utils/esp/source.lua'))() 
 MainESP.Options = {
@@ -26,8 +33,10 @@ CullingSystem.maxRenderDistance = 20000
 CullingSystem.nearDistance = 10000
 CullingSystem.farDistance = 15000
 
-local key, jbremote = loadstring(game:HttpGet('https://raw.githubusercontent.com/Introvert1337/RobloxReleases/refs/heads/main/Scripts/Jailbreak/KeyFetcher.lua'))() -- temporary
-local oldjbremote = getupvalue(network.FireServer, 1)
+local setclipboard = setclipboard or toclipboard or set_clipboard or nil
+local setthreadcontext = setthreadidentity or set_thread_identity or setthreadcontext or set_thread_context or function() Library:Notify("missing setthreadidentity/sethreadcontext, some features might not work") end
+local firesignal = firesignal or function() Library:Notify("missing firesignal, some features might not work") end
+
 configs = {
     player = {
 		walktog = false;
@@ -103,6 +112,7 @@ configs = {
 		snipernogui = false;
 		wallbang = false;
 		nogrenadesmoke = false;
+		nogrenadesmokelimit = false;
 		tasermodz = false;
 		instantrocketseek = false;
 		forcefieldnomiss = false;
@@ -113,11 +123,12 @@ configs = {
 		instantc4throw = false;
 		antic4limit = false;
 		instantbullethit = false;
+		getweapon = false;
 		silentaim = {
 			enabled = false;
 			includetaser = false;
 			includeplasma = false;
-			radius = 250;
+			radius = 50;
 			wallcheck = false;
 			fovcirc = false;
 			fovthick = 5;
@@ -135,11 +146,17 @@ configs = {
 	};
     teleportation = {}; -- soon not yet lmfao
     robberies = {
-		guardnodmg = false;
+		--guardnodmg = false;
 	};
     nametags = {};
 	others = {
 		disablehometurret = false;
+		disablemilitaryturret = false;
+		guardnodmg = false;
+		opendoor = false;
+		prisonelevator = false;
+		nooilblow = false;
+		disablelaser = false;
 	};
 }
 local client = {
@@ -152,7 +169,6 @@ local client = {
 	lastvehiclemodel = nil;
 	vehicleEntered = false;
 	originalequippeddata = {};
-	doorAddedFunction = getconnections(game:GetService("CollectionService"):GetInstanceAddedSignal("Door"))[1].Function;
 	activeaction = {};
 	ori = {
 		hookNearest = require(game:GetService("ReplicatedStorage").VehicleLink.VehicleLinkBinder)._constructor._hookNearest;
@@ -170,6 +186,8 @@ local client = {
 		rayignore = require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList;
 		shoot = require(game:GetService("ReplicatedStorage").Game.Item.Gun).Shoot;
 		attemptToggleCrawling = getupvalue(require(game:GetService("ReplicatedStorage").Game.DefaultActions).crawlButton.onPressed,1).attemptToggleCrawling;
+		circleactionpress =  require(game:GetService("ReplicatedStorage").Module.UI).CircleAction.Press;
+		oillaunchblow = require(game:GetService("ReplicatedStorage").OilRig.OilRigBinder)._constructor._launchBlowUp;
 	};
 	simulatedphysicsprojectile = require(game:GetService("ReplicatedStorage").Module.SimulatedPhysicsProjectile);
 	guardnpcbinder = require(game:GetService("ReplicatedStorage").GuardNPC.GuardNPCBinder);
@@ -208,34 +226,13 @@ local client = {
 	wheel = require(game:GetService("ReplicatedStorage").Module.Wheel.Wheel);
 	localization = require(game:GetService("ReplicatedStorage").Module.Localization);
 	rocketconsts = require(game:GetService("ReplicatedStorage").RocketLauncher.RocketLauncherConsts);
+	dartdispenser = require(game:GetService("ReplicatedStorage").Game.DartDispenser.DartDispenser);
+	rocketworld = require(game:GetService("ReplicatedStorage").Game.RocketWorld);
+	turret = require(game:GetService("ReplicatedStorage").Turret2.Turret);
+	oilrigbinder = require(game:GetService("ReplicatedStorage").OilRig.OilRigBinder)._constructor;
+	gunshopui = require(game:GetService("ReplicatedStorage").Game.GunShop.GunShopUI);
+	spotlightbinder = require(game:GetService("ReplicatedStorage").TrackingSpotlight.TrackingSpotlightBinder);
 }
-
-client.getnumactivec4 = getupvalue(client.c4.ShootBegin, 4)
-client.gethrowablesmokegrenade = getupvalue(require(game:GetService("ReplicatedStorage").Game.Item.SmokeGrenade).ShootBegin, 1)
-client.getnearestplayer = getupvalue(require(game:GetService("ReplicatedStorage").Home.HomeItem.Fabricate.Turret).setup, 12)
-
-client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
-client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 19).Classes
-client.ori.heliupdate = client.vclasses.Heli.Update
-client.door = {
-	openDoor = getupvalue(getproto(getupvalue(client.doorAddedFunction, 2), 1, true)[1], 7);
-	doors = getupvalue(client.doorAddedFunction, 1);
-}
-
-setreadonly(client.combatconst, isreadonly(client.combatconst) and false)
-setreadonly(client.militaryturretconst, isreadonly(client.militaryturretconst) and false)
-setreadonly(client.dogconst, isreadonly(client.dogconst) and false)
-setreadonly(client.rocketconsts, isreadonly(client.rocketconsts) and false)
-
--- i realized that i can just do table value storing but uhhh yea uhh yea uh u-u-u-ultraman
-local itemConfigClone = game:GetService("ReplicatedStorage").Game.ItemConfig:Clone()
-itemConfigClone.Name = "ItemConfigBackup"
-
-local Circle = MainESP.CreateCircle()
-Circle.Radius = configs.combat.silentaim.radius
-Circle.Color = Color3.fromRGB(255,255,255)
-Circle.Position = MainESP.TracerOrigins.Middle
-Circle.NumSides = 50
 
 for i,v in next, getgc() do 
 	if type(v) == "function" and islclosure(v) then
@@ -244,8 +241,23 @@ for i,v in next, getgc() do
 			if table.find(getconstants(v), "StartRagdolling") then
 				client.stunnedragdoll = v
 			end
+			if table.find(getconstants(v), "PlusCash") then
+				client.cashthingy = v
+			end
+			if table.find(getconstants(v), "Door was already resolved:") then
+				client.doorAddedFunction = v
+			end
+			if getconstants(v)[8] == "Door was already resolved:" then
+				client.doors = getupvalue(v, 1)
+			end
+			if infoname == "DoorSequence" then
+				client.opendoor = v
+			end
 			if infoname == "AttemptArrest" then 
 				client.attemptarrest = v
+			end
+			if infoname == "UpdatePlayer" then
+				client.updateplayer = v
 			end
 			if infoname == "StartNitro" then
 				client.startnitro = v
@@ -256,6 +268,12 @@ for i,v in next, getgc() do
 			end
 			if infoname:find("CheatCheck") then -- shit didn't work
 				hookfunction(v, function()  end)
+			end
+		end
+		if getfenv(v).script == game:GetService("ReplicatedStorage").Std.Binder and infoname == "nil" then
+			local upvalue = getupvalue(v, 1) 
+			if typeof(upvalue) == "table" and upvalue._tagName == "BarbedWireClient" then
+				client.barbedwireclient = upvalue
 			end
 		end
 	end
@@ -278,13 +296,65 @@ for i,v in next, client.actionbuttonservice.active do
 	end
 end
 
+client.rocketworld.yousuck = (function() end)
+ 
+client.getnumactivec4 = getupvalue(client.c4.ShootBegin, 4)
+client.gethrowablesmokegrenade = getupvalue(require(game:GetService("ReplicatedStorage").Game.Item.SmokeGrenade).ShootBegin, 1)
+client.getnearestplayer = getupvalue(require(game:GetService("ReplicatedStorage").Home.HomeItem.Fabricate.Turret).setup, 12)
+
+client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
+client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 19).Classes
+client.ori.heliupdate = client.vclasses.Heli.Update
+client.ori.chassisupdate = client.vclasses.Chassis.UpdateEngine
+
+setreadonly(client.combatconst, isreadonly(client.combatconst) and false)
+setreadonly(client.militaryturretconst, isreadonly(client.militaryturretconst) and false)
+setreadonly(client.dogconst, isreadonly(client.dogconst) and false)
+setreadonly(client.rocketconsts, isreadonly(client.rocketconsts) and false)
+
+-- i realized that i can just do table value storing but uhhh yea uhh yea uh u-u-u-ultraman
+local itemConfigClone = game:GetService("ReplicatedStorage").Game.ItemConfig:Clone()
+itemConfigClone.Name = "ItemConfigBackup"
+
+local Circle = MainESP.CreateCircle()
+Circle.Radius = configs.combat.silentaim.radius
+Circle.Color = Color3.fromRGB(255,255,255)
+Circle.Position = MainESP.TracerOrigins.Middle
+Circle.NumSides = 500
+
+local CircleOutline = MainESP.CreateCircle()
+CircleOutline.Radius = configs.combat.silentaim.radius + 2
+CircleOutline.Color = Color3.fromRGB(0, 0, 0)
+CircleOutline.Filled = false
+CircleOutline.Visible = false
+CircleOutline.Position = MainESP.TracerOrigins.Middle
+CircleOutline.NumSides = 500
+
+local CircleFilled = MainESP.CreateCircle()
+CircleFilled.Radius = configs.combat.silentaim.radius - 1
+CircleFilled.Color = Color3.fromRGB(0, 0, 0)
+CircleFilled.Filled = true
+CircleFilled.Visible = false
+CircleFilled.Transparency = 0.5
+CircleFilled.Position = MainESP.TracerOrigins.Middle
+CircleFilled.NumSides = 500
+
+client.ispc = (function()
+	local UserInputService = game:GetService("UserInputService")
+	if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled and not UserInputService.MouseEnabled then
+		return false
+	elseif not UserInputService.TouchEnabled and UserInputService.KeyboardEnabled and UserInputService.MouseEnabled then
+		return true
+	end
+	return false
+end)
+
 client.duckLoop = (function()
 	repeat 
 		client.duck()
 		task.wait(2)
 	until configs.player.backbone == false
 end)
-
 client.flipLoop = (function()
 	repeat task.wait(.1)
 		pcall(function()
@@ -316,12 +386,14 @@ client.getNearestPlayerHook = (function(boolean)
 	if boolean then
 		hookfunction(client.getnearestplayer, function() return nil end)
 	else
-		if isfunctionhooked(client.smokegrenadeitem.getnearestplayer) then restorefunction(client.smokegrenadeitem.getnearestplayer) end
+		if isfunctionhooked(client.getnearestplayer) then restorefunction(client.getnearestplayer) end
 	end
 end)
 client.isCrawlingLoop = (function()
 	repeat task.wait(.1)
-		client.characterutil.IsCrawling = false
+		if client.characterutil.IsCrawling then
+			client.characterutil.IsCrawling = false
+		end
 	until configs.player.crawlequip == false
 end)
 client.hijackLoop = (function()
@@ -332,6 +404,18 @@ client.hijackLoop = (function()
 			end
 		end
 	until configs.vehicle.alwayshij == false
+end)
+client.setnpcignorelp = (function(a)
+	for i,v in next, getupvalue(client.itemsys.GetEquipped, 1) do
+		if v.Character and v.BulletEmitter.IgnoreGuards then
+			v.BulletEmitter.IgnoreLocalPlayer = a
+		end
+	end
+end)
+client.npcnodamageloop = (function()
+	repeat task.wait(0.1)
+		client.setnpcignorelp(false)
+	until configs.others.guardnodmg == false
 end)
 client.nitroLoop = (function()
 	repeat task.wait()
@@ -402,16 +486,23 @@ client.spamBatonSwordLunge = (function()
 	until configs.combat.batonsword.spamlunge == false
 end)
 
-client.notInWall = (function(i,v,wallCheck)
-	if wallCheck then
-        local ray = Ray.new(game:GetService("Workspace").CurrentCamera.CFrame.p, i - game:GetService("Workspace").CurrentCamera.CFrame.p)
-        local result = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(ray, v)
-        return result == nil
-    else
+client.notInWall = (function(pos,ilist,wallCheck)
+	if not wallCheck then
         return true
     end
+	local workspace = game:GetService("Workspace")
+    local camera = workspace.CurrentCamera or nil
+    if camera == nil then
+        return false
+    end
+    local direction = (pos - camera.CFrame.Position).Unit * (pos - camera.CFrame.Position).Magnitude
+    local rayParams = RaycastParams.new()
+    rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+    rayParams.FilterDescendantsInstances = ilist or {}
+    rayParams.IgnoreWater = true
+    local result = workspace:Raycast(camera.CFrame.Position, direction, rayParams)
+    return result == nil
 end)
-
 client.isEnemies = (function(a,b)
     local a, b = tostring(a), tostring(b)
     if a == "Criminal" and b == "Police" then
@@ -438,7 +529,7 @@ client.getNearestToCursor = (function()
 			local magnitude = (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude
 			if magnitude < 300 then -- max bullet distance of all gun is probably around 300 studs. correct me if i'm wrong please
 				local Point, OnScreen = game:GetService("Workspace").CurrentCamera:WorldToViewportPoint(v.Character.HumanoidRootPart.Position)
-				if OnScreen and notInWall(v.Character.HumanoidRootPart.Position,{game:GetService("Players").LocalPlayer.Character, v.Character}, configs.combat.silentaim.wallcheck) then
+				if OnScreen and notInWall(v.Character.HumanoidRootPart.Position, {game:GetService("Players").LocalPlayer.Character, v.Character}, configs.combat.silentaim.wallcheck) then
 					local Distance =(Vector2.new(Point.X, Point.Y) - Vector2.new(middlepos.X, middlepos.Y)).magnitude
 					if Distance < configs.combat.silentaim.radius then
 						Target = v
@@ -567,18 +658,91 @@ client.onHitSurfaceHook = (function()
 	end
 end)
 
+client.opendoorloop = (function()
+	repeat 
+		for i,v in next, client.doors do
+			client.opendoor(v)
+		end
+		task.wait(1.5)
+	until configs.others.opendoor == false
+end)
+
+
+client.callprisonelevator = (function(flor)
+	pcall(function()
+		fireclickdetector(game:GetService("CollectionService"):GetTagged("Elevator")[1].Floors[flor].Call.ClickDetector)
+	end)
+end)
+
+client.prisonelevatorloop = (function()
+	repeat task.wait(0.5)
+		client.callprisonelevator(1)
+	until configs.others.prisonelevator == false
+end)
+
+client.showgunstore = (function()
+	setthreadcontext(2)
+	client.gunshopui.open()
+	setthreadcontext(10)
+end)
+
+client.getallgun = (function()
+	local grabguns = (function()
+		for i,v in next, game:GetService("Players").LocalPlayer.PlayerGui.GunShopGui.Container.Container.Main.Container.Slider:GetChildren() do
+			if v.ClassName == "ImageLabel" and v.Bottom.Action.Text == "EQUIP" then
+				firesignal(v.Bottom.Action.MouseButton1Down)
+			end
+		end
+	end)
+	client.showgunstore()
+	for i,v in next, game:GetService("Players").LocalPlayer.PlayerGui.GunShopGui.Container.Container.Sidebar:GetChildren() do
+		if v.ClassName == "ImageButton" then
+			task.wait()
+			for i = 1, 3 do
+				grabguns()
+			end
+			firesignal(v.MouseButton1Down)
+		end
+	end
+	client.gunshopui.close()
+end)
+
+client.barbedwiremodify = (function(a)
+	local hooklaser = (function()
+		for i,v in next, getproto(client.barbedwireclient._constructor, 1, true) do
+			hookfunction(v, function()
+				return
+			end)
+		end
+	end)
+	local unhooklaser = (function()
+		for i,v in next, getproto(client.barbedwireclient._constructor, 1, true) do
+			if isfunctionhooked(v) then
+				restorefunction(v)
+			end
+		end
+	end)
+	if a then hooklaser() else unhooklaser() end
+end)
+
+client.barbedwireloop = (function()
+	repeat task.wait(1)
+		client.barbedwiremodify(true)
+	until configs.others.disablelaser == false
+end)
+
 task.spawn(function()
 	-- Hooking
     hookfunction(getcallbackvalue(game:GetService("ReplicatedStorage").HawkeyeRemoteFunction, "OnClientInvoke"), function() end)
-	local old
-	old = hookfunction(Instance.new("RemoteEvent").FireServer, function(...)
-		local args = {...}
-		if #args == 4 and debug.traceback():find("LocalScript:1349") then
-			getgenv().acbypassed = true
-			return
-		end
-		return old(...)
-	end)
+	-- local old
+	-- old = hookfunction(Instance.new("RemoteEvent").FireServer, function(...)
+	-- 	local args = {...}
+	-- 	if #args == 4 and debug.traceback():find("LocalScript:1349") then
+	-- 		getgenv().acbypassed = true
+	-- 		return
+	-- 	end
+	-- 	return old(...)
+	-- end)
 	client.simulatedphysicsprojectile.HitTargetWithSpeed = (function(...)
 		local args = {...}
 		if configs.combat.forcefieldnomiss and args[3] == 75 then
@@ -596,7 +760,7 @@ task.spawn(function()
 		return client.ori.bulletemitteronlocalhitplayer(unpack(args))
 	end)
 
-	client.itemgun.Shoot = (function(self,a)
+	client.itemgun.Shoot = (function(self, a)
 		if configs.combat.silentaim.enabled then
 			local character = client.getNearestToCursor() and client.getNearestToCursor().Character
 			local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -605,7 +769,9 @@ task.spawn(function()
 			end
 		end
 		local oldLastUpdate = self.BulletEmitter.LastUpdate
+		local oldignorelist = self.BulletEmitter.IgnoreList
 		self.BulletEmitter.LastUpdate = configs.combat.instantbullethit and -9e9 or oldLastUpdate
+		self.BulletEmitter.IgnoreList = configs.combat.wallbang and {workspace} or oldignorelist
 		client.ori.shoot(self, a)
 	end)
 
@@ -660,16 +826,6 @@ task.spawn(function()
 		return configs.combat.noequipt and 0 or client.ori.getequiptime(...)
 	end)
 
-	client.circleac.Update = (function(...) -- i might change it later 
-		local uh = ...
-		pcall(function()
-			client.ori.update(uh)
-			if configs.player.nocircwait then
-				client.circleac.Spec.PressedAt = 0.01
-			end
-		end)
-	end)
-
 	client.paraglide.IsFlying = (function(...)
 		return configs.player.nosky and debug.traceback():find("Falling") and true or client.ori.isflying(...)
 	end)
@@ -700,10 +856,37 @@ task.spawn(function()
 		end
 	end)
 
-	-- game:GetService("Players").LocalPlayer:GetMouse().Move:Connect(function()
-	-- 	local Mouse = game:GetService"UserInputService":GetMouseLocation()
-	-- 	Circle.Position = Vector2.new(Mouse.X, Mouse.Y)
-	-- end)
+	local blacklistedaction = {
+		"Rob";
+		"Hack";
+		"Open Crate";
+		"Break In";
+		"Pull Lever";
+		"Place TNT";
+	}
+	client.circleac.Press = (function()
+		local spec = getupvalue(client.ori.circleactionpress, 1).Spec
+		if configs.player.nocircwait and spec and not table.find(blacklistedaction, spec.Name) then
+			spec:Callback(true)
+		end
+		return client.ori.circleactionpress()
+	end)
+
+	client.oilrigbinder._launchBlowUp = (function(a)
+		if configs.others.nooilblow then
+			return
+		end
+		return client.ori.oillaunchblow(a)
+	end)
+
+	game:GetService("Players").LocalPlayer:GetMouse().Move:Connect(function()
+		if client.ispc() then
+			local Mouse = game:GetService"UserInputService":GetMouseLocation()
+			Circle.Position = Vector2.new(Mouse.X, Mouse.Y)
+			CircleFilled.Position = Vector2.new(Mouse.X, Mouse.Y)
+			CircleOutline.Position = Vector2.new(Mouse.X, Mouse.Y)
+		end
+	end)
     game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
         local hrp = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart")
         if hrp then
@@ -714,6 +897,11 @@ task.spawn(function()
                 hrp:AddTag("NoRagdoll")
             end
         end
+		if configs.combat.getweapon then
+			task.delay(0.1, function()
+				client.getallgun()
+			end)
+		end
 		--[[
 		task.wait(0.1)
 		for i,v in next, getconnections(game:GetService("Players").LocalPlayer.Character.Humanoid.StateChanged) do -- useless
@@ -824,7 +1012,11 @@ AddToggle = (function(groupboxes, txt, clbck, default, tootip) -- just to make t
 	local tbl = {
         Text = txt;
         Default = default;
-        Callback = clbck;
+        Callback = function(a)
+			task.spawn(function()
+				clbck(a)
+			end)
+		end;
 		Tooltip = tootip;
     }
 	if tootip == false then 
@@ -851,13 +1043,6 @@ AddSlider = (function(groupboxes, txt, clbck, default, min, max, round, tootip)
 	end
     groupboxes:AddSlider(string.gsub(txt, " ", ""), tbl)
 end)
-
-local repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
-local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
-local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
-local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
-local Options = Library.Options
-local Toggles = Library.Toggles
 
 Library.ShowToggleFrameInKeybinds = true 
 Library.ShowCustomCursor = false
@@ -917,13 +1102,16 @@ AddToggle(group, "Anti Crawling Slow", function(a)
 	configs.player.nocslow = a
 	setconstant(client.walkspeedfun, 16, configs.player.nocslow and 1 or 0.4)
 end)
-AddToggle(group, "Anti Spotlight Slow", function(a) -- might be not working but... whatevahh 
+AddToggle(group, "Anti Spotlight Slow", function(a)
 	configs.player.nopslow = a
 	setconstant(client.walkspeedfun, 31, configs.player.nospslow and "hey_plainrocky123" or "IsLocalInSpotlight")
 	setconstant(client.walkspeedfun, 33, configs.player.nospslow and "yourmomma" or "IsInTrackingSpotlight")
+	setconstant(client.walkspeedfun, 35, a and 0 or 0.8)
+	setconstant(getproto(client.spotlightbinder._constructor.TrackPlayer, 1), 14, a and 0 or 2.5)
 end)
 AddToggle(group, "No Circle Hold", function(a)
 	configs.player.nocircwait = a
+	setconstant(client.updateplayer, 38, a and 0 or 0.5)
 end)
 AddToggle(group, "No Roll Cooldown", function(a)
 	configs.player.norwait = a
@@ -931,7 +1119,7 @@ AddToggle(group, "No Roll Cooldown", function(a)
 	client.rollratelimiter._budgetPerWindow = configs.player.norwait and 9e9 or 10
 	client.rollratelimiter._budgetWindowDuration = configs.player.norwait and 9e9 or 10
 end)
-AddToggle(group, "Always Sprinting", function(a) -- might be not working but... whatevahh 
+AddToggle(group, "Always Sprinting", function(a)
 	configs.player.alwayssp = a
 	if a then
 		client.sprintLoop()
@@ -993,15 +1181,11 @@ AddToggle(group, "Apply Turn Speed", function(a)
 		client.updateToOriginalChassisStats()
 	end
 end)
--- AddToggle(group, "Infinite Tire Traction", function(a) -- not completed :>>>>>
--- 	configs.vehicle.inftrac = a
--- end, false, "not completred")
 AddToggle(group, "Anti Tire Pop", function(a)
 	configs.vehicle.nopop = a
 end)
 AddToggle(group, "Drive On Water", function(a)
 	configs.vehicle.driveonwater = a
-	setconstant(client.alexchassis.UpdateEngine, 280, configs.vehicle.driveonwater and 1 or 0.625)
 end)
 AddToggle(group, "Always Flip", function(a)
 	configs.vehicle.autoflip = a
@@ -1027,6 +1211,9 @@ AddToggle(group, "Instant Heli Pickup", function(a)
 end)
 AddToggle(group, "Anti Heli Down", function(a)
 	configs.vehicle.helibreak = a
+end)
+AddToggle(group, "Infinite Heli Height", function(a)
+	configs.vehicle.heliheight = a
 end)
 
 local group = tab:AddRightGroupbox("Utilities")
@@ -1087,6 +1274,9 @@ end)
 AddToggle(group, "Increase Forcefield Damage", function(a)
 	configs.combat.increaseforcedamage = a
 end)
+AddToggle(group, "Shoot Through Wall", function(a)
+	configs.combat.wallbang = a
+end)
 AddToggle(group, "Shoot Through Forcefield", function(a)
 	configs.combat.shootthroughforce =a
 	setconstant(client.bulletemitter.Update, 26, configs.combat.shootthroughforce and 0 or 1)
@@ -1106,6 +1296,14 @@ AddToggle(group, "Faster Forcefield Reload", function(a)
 end)
 AddToggle(group, "Anti Forcefield Misses", function(a)
 	configs.combat.forcefieldnomiss = a
+end)
+AddToggle(group, "Anti Smoke Grenande Effect", function(a)
+	configs.combat.nogrenadesmoke = a
+	client.smokeGrenadeHook(a)
+end)
+AddToggle(group, "Anti Smoke Grenade Limit", function(a)
+	configs.combat.nogrenadesmokelimit = a
+	setconstant(client.gethrowablesmokegrenade, 6, a and 0 or 1)
 end)
 
 local group = tab:AddLeftGroupbox("Melee")
@@ -1144,10 +1342,16 @@ end)
 AddToggle(group, "FOV Circle", function(a)
 	configs.combat.silentaim.fovcirc = a
 	Circle.Visible = a
+	CircleOutline.Visible = a
+end)
+AddToggle(group, "FOV Circle Filled", function(a)
+	CircleFilled.Visible = a
 end)
 AddSlider(group, "Radius", function(a) 
 	configs.combat.silentaim.radius = a
 	Circle.Radius = a
+	CircleOutline.Radius = a + 2
+	CircleFilled.Radius = a - 1
 end, 50, 10, 1000, 0)
 
 local group = tab:AddRightGroupbox("Arrest Aura")
@@ -1157,6 +1361,30 @@ AddToggle(group, "Enabled", function(a)
 		client.launchArrestAura()
 	end	
 end)
+
+local group = tab:AddRightGroupbox("Gun Store")
+AddToggle(group, "Get All Owned Gun On Respawn", function(a)
+	configs.combat.getweapon = a
+end)
+group:AddButton({
+	Text = 'Get All Owned Gun',
+	Func = function()
+		client.getallgun()
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true
+})
+group:AddButton({
+	Text = 'Open Gunstore UI',
+	Func = function()
+		client.showgunstore()
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true
+})
+
 -- local group = tab:AddRightGroupbox("Hitboxes")
 -- AddSlider(group, "Radius", function(a) 
 -- 	configs.combat.hitboxradius = a
@@ -1200,7 +1428,7 @@ AddToggle(group, "Text Outline", function(a)
 	MainESP.Options.TextOutline = a
 end)
 AddSlider(group, "Text Size", function(a) 
-	MainESP.FontSize = a
+	MainESP.Options.FontSize = a
 end, 15, 1, 50, 0)
 group:AddDropdown('TracerOrigins', {
 	Values = {"Top","Middle","Bottom"},
@@ -1213,9 +1441,74 @@ group:AddDropdown('TracerOrigins', {
 	end,
 	Visible = true, -- Will make the dropdown invisible (true / false)
 })
+local tab = Window:AddTab("Others")
+local group = tab:AddLeftGroupbox("Protections")
+AddToggle(group, "Disable Lasers", function(a)
+	configs.others.disablelaser = a
+	if a then
+		client.barbedwireloop()
+	end
+	task.delay(0.1, function()
+		client.barbedwiremodify(false)
+	end)
+end)
+AddToggle(group, "Disable Home Turret", function(a)
+	configs.others.disablehometurret = a
+	client.getNearestPlayerHook(a)
+end)
+AddToggle(group, "Disable Military Turret", function(a)
+	configs.others.disablehometurret = a
+	client.militaryturretconst.FIRE_RATE = a and 9e9 or 0.1
+end)
+AddToggle(group, "Disable Guard Damage", function(a)
+	configs.others.guardnodmg = a
+	if a then
+		client.npcnodamageloop()
+	end
+	client.setnpcignorelp(true)
+end)
+local group = tab:AddLeftGroupbox("Server")
+AddToggle(group, "Open All Doors & Gates", function(a)
+	configs.others.opendoor = a
+	if a then
+		client.opendoorloop()
+	end
+end)
+AddToggle(group, "Break Prison Elevator", function(a)
+	configs.others.prisonelevator = a
+	if a then
+		client.prisonelevatorloop()
+	else
+		client.callprisonelevator(2)
+	end
+end)
+local group = tab:AddRightGroupbox("Oil Rig")
+AddToggle(group, "Disable Turret", function(a)
+	setconstant(client.turret.ShootLaser, 31, a and 9e9 or 0.5)
+end)
+AddToggle(group, "Disable Self Destruct", function(a)
+	configs.others.nooilblow = a
+end)
+
+
+local group = tab:AddRightGroupbox("Cargo Ship")
+AddToggle(group, "Disable Turret", function(a)
+	setconstant(client.turret.ShootRocket, 16, a and "yousuck" or "Launch")
+end)
+
+
 -- config system is kinda buggy on linoria soo some features probably won't automatically set to saved config system
 local tab = Window:AddTab("⚙️")
 local MenuGroup = tab:AddLeftGroupbox("Menu")
+MenuGroup:AddLabel("Join Our Discord For Receiving The Latest News About Codecoat!", true)
+MenuGroup:AddButton("Copy Discord Invite", function() 
+	if setclipboard == nil then
+		Library:Notify("Copy Discord Invite Failed!, Missing Function: setclipboard")
+		return
+	end
+	setclipboard("https://discord.gg/R82qYWkAsh")
+	Library:Notify("Success!")
+end)
 MenuGroup:AddToggle("KeybindMenuOpen", { Default = Library.KeybindFrame.Visible, Text = "Open Keybind Menu", Callback = function(value) Library.KeybindFrame.Visible = value end})
 MenuGroup:AddDivider()
 MenuGroup:AddLabel("Menu bind"):AddKeyPicker("MenuKeybind", { Default = "RightShift", NoUI = true, Text = "Menu keybind" })
