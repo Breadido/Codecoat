@@ -1,4 +1,4 @@
--- i recommend yall to not seeing this shitty source, because most of these stuff is from old jb script which at the time still learning luau soo everything here is 1000% guranteed full of masterpiece of shitfest code
+-- i recommend yall to not seeing this shitty source, because most of these stuff is from old jb script which at the time that i'm still learning luau soo everything here is 1000% guranteed full of masterpiece of shitfest code
 local repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
@@ -34,15 +34,15 @@ CullingSystem.nearDistance = 10000
 CullingSystem.farDistance = 15000
 
 local setclipboard = setclipboard or toclipboard or set_clipboard or nil
-local setthreadcontext = setthreadidentity or set_thread_identity or setthreadcontext or set_thread_context or function() Library:Notify("missing setthreadidentity/sethreadcontext, some features might not work") end
-local firesignal = firesignal or function() Library:Notify("missing firesignal, some features might not work") end
+local setthreadcontext = setthreadidentity or set_thread_identity or setthreadcontext or set_thread_context or function() Library:Notify("missing setthreadidentity/sethreadcontext") end
+local firesignal = firesignal or function() Library:Notify("missing firesignal") end
 
 configs = {
     player = {
 		walktog = false;
 		walkval = 0;
 		infjump = false;
-		autoescape = false;
+		respawndeathloc = false;
 		nofall = false;
 		norag = false;
 		noislow = false;
@@ -52,7 +52,9 @@ configs = {
 		nocslow = false;
 		nocircwait = false;
 		nopwait = false;
+		nocwait = false;
 		bypasskd = false;
+		doornoreq = false;
 		alwayssilentp = false;
 		alwaysp = false;
 		alwayssp = false;
@@ -157,10 +159,12 @@ configs = {
 		prisonelevator = false;
 		nooilblow = false;
 		disablelaser = false;
+		opensewer = false;
 	};
 }
 local client = {
 	tankdata = {};
+	inprogress = false;
 	lastvehiclestats = {
 		GarageEngineSpeed = nil;
 		Height = nil;
@@ -170,6 +174,7 @@ local client = {
 	vehicleEntered = false;
 	originalequippeddata = {};
 	activeaction = {};
+	activel = {};
 	ori = {
 		hookNearest = require(game:GetService("ReplicatedStorage").VehicleLink.VehicleLinkBinder)._constructor._hookNearest;
 		bulletemitteronlocalhitplayer = require(game:GetService("ReplicatedStorage").Game.Item.Gun).BulletEmitterOnLocalHitPlayer;
@@ -232,7 +237,34 @@ local client = {
 	oilrigbinder = require(game:GetService("ReplicatedStorage").OilRig.OilRigBinder)._constructor;
 	gunshopui = require(game:GetService("ReplicatedStorage").Game.GunShop.GunShopUI);
 	spotlightbinder = require(game:GetService("ReplicatedStorage").TrackingSpotlight.TrackingSpotlightBinder);
+	inventoryitemsystem = require(game:GetService("ReplicatedStorage").Inventory.InventoryItemSystem);
+	interval = require(game:GetService("ReplicatedStorage").Std.Interval);
+	guardnpcbinder = require(game:GetService("ReplicatedStorage").GuardNPC.GuardNPCBinder)._constructor;
 }
+
+client.tagfuninstance = getupvalue(getconnections(game:GetService("CollectionService"):GetInstanceAddedSignal("SewerHatch"))[1].Function, 3)
+client.dooraddedsignal = getconnections(game:GetService("CollectionService"):GetInstanceAddedSignal("Door"))[1].Function
+-- client.opendoor = getupvalue(getupvalue(client.dooraddedsignal, 2), 4)
+client.doors = getupvalue(client.dooraddedsignal, 1)
+client.doors.cellz = {}
+client.oilexplosion = workspace.OilRig.OpenCloseSignal.Explosion
+
+client.rocketworld.yousuck = (function() end)
+ 
+client.getnumactivec4 = getupvalue(client.c4.ShootBegin, 4)
+client.gethrowablesmokegrenade = getupvalue(require(game:GetService("ReplicatedStorage").Game.Item.SmokeGrenade).ShootBegin, 1)
+client.getnearestplayer = getupvalue(require(game:GetService("ReplicatedStorage").Home.HomeItem.Fabricate.Turret).setup, 12)
+client.circleupdateui = getupvalue(client.circleac.Update, 1)
+
+client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
+client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 19).Classes
+client.ori.heliupdate = client.vclasses.Heli.Update
+client.ori.chassisupdate = client.vclasses.Chassis.UpdateEngine
+
+setreadonly(client.combatconst, isreadonly(client.combatconst) and false)
+setreadonly(client.militaryturretconst, isreadonly(client.militaryturretconst) and false)
+setreadonly(client.dogconst, isreadonly(client.dogconst) and false)
+setreadonly(client.rocketconsts, isreadonly(client.rocketconsts) and false)
 
 for i,v in next, getgc() do 
 	if type(v) == "function" and islclosure(v) then
@@ -244,14 +276,18 @@ for i,v in next, getgc() do
 			if table.find(getconstants(v), "PlusCash") then
 				client.cashthingy = v
 			end
-			if table.find(getconstants(v), "Door was already resolved:") then
-				client.doorAddedFunction = v
-			end
-			if getconstants(v)[8] == "Door was already resolved:" then
-				client.doors = getupvalue(v, 1)
-			end
-			if infoname == "DoorSequence" then
-				client.opendoor = v
+			-- if table.find(getconstants(v), "Door was already resolved:") then
+			-- 	client.doorAddedFunction = v
+			-- end
+			-- if getconstants(v)[8] == "Door was already resolved:" then
+			-- 	client.doors = getupvalue(v, 1)
+			-- end
+			-- if infoname == "DoorSequence" then
+			-- 	client.opendoor = v
+			-- end
+			if infoname == "HasPerm" then
+				client.hasperm = v
+				client.ori.hasperm = v
 			end
 			if infoname == "AttemptArrest" then 
 				client.attemptarrest = v
@@ -296,23 +332,12 @@ for i,v in next, client.actionbuttonservice.active do
 	end
 end
 
-client.rocketworld.yousuck = (function() end)
- 
-client.getnumactivec4 = getupvalue(client.c4.ShootBegin, 4)
-client.gethrowablesmokegrenade = getupvalue(require(game:GetService("ReplicatedStorage").Game.Item.SmokeGrenade).ShootBegin, 1)
-client.getnearestplayer = getupvalue(require(game:GetService("ReplicatedStorage").Home.HomeItem.Fabricate.Turret).setup, 12)
+for i,v in next, client.doors do
+	if v.Model and v.Model.Parent.Name == "Cell" then
+		table.insert(client.doors.cellz, v)
+	end
+end
 
-client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
-client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 19).Classes
-client.ori.heliupdate = client.vclasses.Heli.Update
-client.ori.chassisupdate = client.vclasses.Chassis.UpdateEngine
-
-setreadonly(client.combatconst, isreadonly(client.combatconst) and false)
-setreadonly(client.militaryturretconst, isreadonly(client.militaryturretconst) and false)
-setreadonly(client.dogconst, isreadonly(client.dogconst) and false)
-setreadonly(client.rocketconsts, isreadonly(client.rocketconsts) and false)
-
--- i realized that i can just do table value storing but uhhh yea uhh yea uh u-u-u-ultraman
 local itemConfigClone = game:GetService("ReplicatedStorage").Game.ItemConfig:Clone()
 itemConfigClone.Name = "ItemConfigBackup"
 
@@ -338,6 +363,22 @@ CircleFilled.Visible = false
 CircleFilled.Transparency = 0.5
 CircleFilled.Position = MainESP.TracerOrigins.Middle
 CircleFilled.NumSides = 500
+
+client.getremotekeyfromdecompiledsource = (function(decompiledstr, keytabletoremove)
+	-- my shitty attempt making my own key remote fetcher via using medal decompiler
+	-- will be using ts later on probably next update 
+	local strkey = {}
+	for i,v in ipairs(string.split(decompiledstr, "\n")) do
+		if string.find(v, ":FireServer", 0) then
+			local currentstr = string.gsub(string.gsub(tostring(v), ":FireServer", ""), " ", "")
+			for i2,v2 in next, keytabletoremove do
+				currentstr = string.gsub(currentstr, v2, "")
+			end
+			strkey[#strkey + 1] = loadstring("return".. currentstr:sub(2, currentstr:len() - 1))()
+		end
+	end
+	return strkey
+end)
 
 client.ispc = (function()
 	local UserInputService = game:GetService("UserInputService")
@@ -407,7 +448,7 @@ client.hijackLoop = (function()
 end)
 client.setnpcignorelp = (function(a)
 	for i,v in next, getupvalue(client.itemsys.GetEquipped, 1) do
-		if v.Character and v.BulletEmitter.IgnoreGuards then
+		if v.Character and v.BulletEmitter and v.BulletEmitter.IgnoreGuards then
 			v.BulletEmitter.IgnoreLocalPlayer = a
 		end
 	end
@@ -660,17 +701,28 @@ end)
 
 client.opendoorloop = (function()
 	repeat 
-		for i,v in next, client.doors do
-			client.opendoor(v)
+		for i,v in next, client.tagfuninstance do
+			v["Fun"]()
 		end
 		task.wait(1.5)
 	until configs.others.opendoor == false
 end)
 
+client.getprisonelevator = (function()
+	for i,v in next, workspace:GetChildren() do
+		if v:IsA("Model") and v.Name == "Elevator" and v:FindFirstChild("Car") and v.Car:FindFirstChild("InnerModel") and v.Car.InnerModel:FindFirstChild("Calls") and v.Car.InnerModel.Calls[1]:FindFirstChild("SurfaceGui").TextLabel.Text == "1*" then
+			return v
+		end
+	end
+	return nil
+end)
 
 client.callprisonelevator = (function(flor)
 	pcall(function()
-		fireclickdetector(game:GetService("CollectionService"):GetTagged("Elevator")[1].Floors[flor].Call.ClickDetector)
+		--fireclickdetector(game:GetService("CollectionService"):GetTagged("Elevator")[1].Floors[flor].Call.ClickDetector)
+		if client.getprisonelevator() ~= nil then
+			fireclickdetector(client.getprisonelevator().Car.InnerModel.Calls[1].ClickDetector)
+		end
 	end)
 end)
 
@@ -731,6 +783,44 @@ client.barbedwireloop = (function()
 	until configs.others.disablelaser == false
 end)
 
+client.dropall = (function()
+	for i,v in next, client.inventoryitemsystem.getInventoryItemsFor(game:GetService("Players").LocalPlayer) do
+		local ignore = {"Bag", "Crate", "Gem", "Taser", "Handcuffs", "RoadSpike", "MansionInvite"}
+		if not table.find(ignore, v.obj.Name) then
+			v:AttemptSetEquipped(true)
+			v:AttemptDrop()
+		end
+	end
+end)
+
+client.deathtp = (function(cframe)
+	game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid").Health = 0
+    repeat
+        task.wait()
+    until game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid") and game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid").Health > 0
+    local Timeout = os.time()
+    repeat
+        game:GetService("Players").LocalPlayer.Character:PivotTo(CFrame.new(cframe.Position))
+        task.wait()
+    until os.time() - Timeout > 1
+	client.inprogress = false
+end)
+
+client.openclosedcell = (function()
+	for i,v in next, client.doors.cellz do
+		if v.State.Open == false then
+			v.State.Open = true
+			v:OpenFun()
+		end
+	end
+end)
+
+client.cellloop = (function()
+	repeat task.wait(0.1)
+		client.openclosedcell()
+	until configs.player.nocwait == false
+end)
+
 task.spawn(function()
 	-- Hooking
     hookfunction(getcallbackvalue(game:GetService("ReplicatedStorage").HawkeyeRemoteFunction, "OnClientInvoke"), function() end)
@@ -743,6 +833,17 @@ task.spawn(function()
 	-- 	end
 	-- 	return old(...)
 	-- end)
+
+	client.ori.hasperm = hookfunction(client.hasperm, function(...)
+		if configs.player.doornoreq then
+			return true
+		end
+		if configs.others.opendoor then
+			return true
+		end
+		return client.ori.hasperm(...)
+	end)
+
 	client.simulatedphysicsprojectile.HitTargetWithSpeed = (function(...)
 		local args = {...}
 		if configs.combat.forcefieldnomiss and args[3] == 75 then
@@ -872,12 +973,12 @@ task.spawn(function()
 		return client.ori.circleactionpress()
 	end)
 
-	client.oilrigbinder._launchBlowUp = (function(a)
-		if configs.others.nooilblow then
-			return
-		end
-		return client.ori.oillaunchblow(a)
-	end)
+	-- client.oilrigbinder._launchBlowUp = (function(a)
+	-- 	if configs.others.nooilblow then
+	-- 		return
+	-- 	end
+	-- 	return client.ori.oillaunchblow(a)
+	-- end)
 
 	game:GetService("Players").LocalPlayer:GetMouse().Move:Connect(function()
 		if client.ispc() then
@@ -887,7 +988,23 @@ task.spawn(function()
 			CircleOutline.Position = Vector2.new(Mouse.X, Mouse.Y)
 		end
 	end)
-    game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
+
+	if game:GetService("Players").LocalPlayer.Character and game:GetService("Players").LocalPlayer.Character:FindFirstAncestorOfClass("Humanoid") then
+		game:GetService("Players").LocalPlayer.Character.Humanoid.Died:Connect(function(a)
+			--local celltime = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.CellTime
+			if client.inprogress == false and configs.player.respawndeathloc then
+				client.inprogress = true
+				local cf = game:GetService("Players").LocalPlayer.Character:GetModelCFrame()
+				-- if celltime.Visible then
+				-- 	print("waiting for your cell to be opened, please wait")
+				-- 	repeat task.wait() until celltime.Visible == false
+				-- end
+				client.deathtp(cf)
+			end
+		end)
+	end
+
+    game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function(a)
         local hrp = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart")
         if hrp then
             if configs.player.nofall then 
@@ -902,6 +1019,20 @@ task.spawn(function()
 				client.getallgun()
 			end)
 		end
+		repeat task.wait() until a:FindFirstChildOfClass("Humanoid")
+		task.wait(0.1)
+		a.Humanoid.Died:Connect(function(a)
+			-- local celltime = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.CellTime
+			if client.inprogress == false and configs.player.respawndeathloc then
+				client.inprogress = true
+				local cf = game:GetService("Players").LocalPlayer.Character:GetModelCFrame()
+				-- if celltime.Visible then
+				-- 	print("waiting for your cell to be opened, please wait")
+				-- 	repeat task.wait() until celltime.Visible == false
+				-- end
+				client.deathtp(cf)
+			end
+		end)
 		--[[
 		task.wait(0.1)
 		for i,v in next, getconnections(game:GetService("Players").LocalPlayer.Character.Humanoid.StateChanged) do -- useless
@@ -1065,9 +1196,9 @@ local tab = Window:AddTab("Player")
 
 local group = tab:AddLeftGroupbox("Utilities")
 
--- AddToggle(group, "Automatic Escape", function(a)
--- 	print(a)
--- end)
+AddToggle(group, "Respawn At Death Location", function(a)
+	configs.player.respawndeathloc = a
+end)
 AddToggle(group, "Anti Ragdoll", function(a)
 	configs.player.norag = a
 	local hrp = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart") or nil
@@ -1109,9 +1240,18 @@ AddToggle(group, "Anti Spotlight Slow", function(a)
 	setconstant(client.walkspeedfun, 35, a and 0 or 0.8)
 	setconstant(getproto(client.spotlightbinder._constructor.TrackPlayer, 1), 14, a and 0 or 2.5)
 end)
+AddToggle(group, "Anti Cell Wait", function(a)
+	configs.player.nocwait = a
+	if a then
+		client.cellloop()
+	end
+end)
 AddToggle(group, "No Circle Hold", function(a)
 	configs.player.nocircwait = a
 	setconstant(client.updateplayer, 38, a and 0 or 0.5)
+end)
+AddToggle(group, "Circle Anti Clipping", function(a)
+	setconstant(client.circleupdateui, 30, a and "Duration" or "NoRay")
 end)
 AddToggle(group, "No Roll Cooldown", function(a)
 	configs.player.norwait = a
@@ -1128,9 +1268,9 @@ end)
 AddToggle(group, "Infinite Jump", function(a)
 	configs.player.infjump = a
 end)
-AddToggle(group, "Bypass Keycard Door", function(a)
-	configs.player.bypasskd = a
-	client.hasKeyHook(configs.player.bypasskd)
+AddToggle(group, "Bypass Door Requirements", function(a)
+	configs.player.doornoreq = a
+	--client.hasKeyHook(configs.player.bypasskd)
 end)
 AddToggle(group, "Allow Equip When Crawling", function(a)
 	configs.player.crawlequip = a
@@ -1462,12 +1602,13 @@ AddToggle(group, "Disable Military Turret", function(a)
 end)
 AddToggle(group, "Disable Guard Damage", function(a)
 	configs.others.guardnodmg = a
+	setconstant(client.guardnpcbinder._onItemEquipped, 8, a and "yeafuckyou" or "IgnoreLocalPlayer")
 	if a then
 		client.npcnodamageloop()
 	end
 	client.setnpcignorelp(true)
 end)
-local group = tab:AddLeftGroupbox("Server")
+local group = tab:AddLeftGroupbox("Fun")
 AddToggle(group, "Open All Doors & Gates", function(a)
 	configs.others.opendoor = a
 	if a then
@@ -1487,7 +1628,8 @@ AddToggle(group, "Disable Turret", function(a)
 	setconstant(client.turret.ShootLaser, 31, a and 9e9 or 0.5)
 end)
 AddToggle(group, "Disable Self Destruct", function(a)
-	configs.others.nooilblow = a
+	client.oilexplosion.Name = a and "plainrocky123" or "Explosion"
+	print(client.oilexplosion.Name)
 end)
 
 
