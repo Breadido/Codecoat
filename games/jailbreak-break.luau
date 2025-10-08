@@ -100,6 +100,12 @@ configs = {
 		heliheight = false;
 		instanttow = false;
 		driveonwater = false;
+		tanksus = false;
+		tanksushe = 5.3;
+		tankengine = false;
+		tankenginesp = 0;
+		--voltengine = false;
+		voltenginesp = 0;
 	};
     combat = {
 		hitboxradius = 3;
@@ -170,30 +176,15 @@ local client = {
 		Height = nil;
 		TurnSpeed = nil;
 	};
+	lastmotorcyclestats = {
+		f = nil;
+		Height = nil;
+	};
 	lastvehiclemodel = nil;
 	vehicleEntered = false;
 	originalequippeddata = {};
 	activeaction = {};
 	activel = {};
-	ori = {
-		hookNearest = require(game:GetService("ReplicatedStorage").VehicleLink.VehicleLinkBinder)._constructor._hookNearest;
-		bulletemitteronlocalhitplayer = require(game:GetService("ReplicatedStorage").Game.Item.Gun).BulletEmitterOnLocalHitPlayer;
-		updateseeking = require(game:GetService("ReplicatedStorage").VehicleLink.VehicleLinkBinder)._constructor._updateSeeking;
-		hittargetwithspeed = require(game:GetService("ReplicatedStorage").Module.SimulatedPhysicsProjectile).HitTargetWithSpeed;
-		isflying = require(game:GetService("ReplicatedStorage").Game.Paraglide).IsFlying;
-		tase = require(game:GetService("ReplicatedStorage").Game.Item.Taser).Tase;
-		doesplayerowncached = require(game:GetService("ReplicatedStorage").Game.Gamepass.GamepassSystem).doesPlayerOwnCached;
-		update = require(game:GetService("ReplicatedStorage").Module.UI).CircleAction.Update;
-		getequiptime = require(game:GetService("ReplicatedStorage").Game.GunShop.GunUtils).getEquipTime;
-		rayignorenon = require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollide;
-		plasmashootother = require(game:GetService("ReplicatedStorage").Game.Item.PlasmaGun).ShootOther;
-		pistolsetupmodel = require(game:GetService("ReplicatedStorage").Game.Item.Pistol).SetupModel;
-		rayignore = require(game:GetService("ReplicatedStorage").Module.RayCast).RayIgnoreNonCollideWithIgnoreList;
-		shoot = require(game:GetService("ReplicatedStorage").Game.Item.Gun).Shoot;
-		attemptToggleCrawling = getupvalue(require(game:GetService("ReplicatedStorage").Game.DefaultActions).crawlButton.onPressed,1).attemptToggleCrawling;
-		circleactionpress =  require(game:GetService("ReplicatedStorage").Module.UI).CircleAction.Press;
-		oillaunchblow = require(game:GetService("ReplicatedStorage").OilRig.OilRigBinder)._constructor._launchBlowUp;
-	};
 	simulatedphysicsprojectile = require(game:GetService("ReplicatedStorage").Module.SimulatedPhysicsProjectile);
 	guardnpcbinder = require(game:GetService("ReplicatedStorage").GuardNPC.GuardNPCBinder);
 	combatconst = require(game:GetService("ReplicatedStorage").Combat.CombatConsts);
@@ -206,6 +197,7 @@ local client = {
 	characterutil = require(game:GetService("ReplicatedStorage").Game.CharacterUtil);
 	paraglide = require(game:GetService("ReplicatedStorage").Game.Paraglide);
 	alexchassis = require(game:GetService("ReplicatedStorage").Module.AlexChassis);
+	alexchassis2 = require(game:GetService("ReplicatedStorage").Module.AlexChassis2);
 	dog = require(game:GetService("ReplicatedStorage").Game.Dog.Dog);
     dogsystem = require(game:GetService("ReplicatedStorage").Game.Dog.DogSystem);
 	itemgun = require(game:GetService("ReplicatedStorage").Game.Item.Gun);
@@ -239,8 +231,26 @@ local client = {
 	spotlightbinder = require(game:GetService("ReplicatedStorage").TrackingSpotlight.TrackingSpotlightBinder);
 	inventoryitemsystem = require(game:GetService("ReplicatedStorage").Inventory.InventoryItemSystem);
 	interval = require(game:GetService("ReplicatedStorage").Std.Interval);
-	guardnpcbinder = require(game:GetService("ReplicatedStorage").GuardNPC.GuardNPCBinder)._constructor;
+	tankbinder = require(game:GetService("ReplicatedStorage").Tank.TankBinder)._constructor;
 }
+
+client.ori = {
+	hookNearest = client.vehiclelinkbinder._constructor._hookNearest;
+	bulletemitteronlocalhitplayer = client.itemgun.BulletEmitterOnLocalHitPlayer;
+	hittargetwithspeed = client.simulatedphysicsprojectile.HitTargetWithSpeed;
+	isflying = client.paraglide.IsFlying;
+	tase = client.tase.Tase;
+	doesplayerowncached = client.gamepasssystem.doesPlayerOwnCached;
+	update = client.circleac.Update;
+	getequiptime = client.gunutil.getEquipTime;
+	rayignorenon = client.raycast.RayIgnoreNonCollide;
+	plasmashootother = client.plasmagun.ShootOther;
+	pistolsetupmodel = client.pistolitem.SetupModel;
+	rayignore = client.raycast.RayIgnoreNonCollideWithIgnoreList;
+	shoot = client.itemgun.Shoot;
+	circleactionpress =  client.circleac.Press;
+	oillaunchblow = client.oilrigbinder._launchBlowUp;
+};
 
 client.tagfuninstance = getupvalue(getconnections(game:GetService("CollectionService"):GetInstanceAddedSignal("SewerHatch"))[1].Function, 3)
 client.dooraddedsignal = getconnections(game:GetService("CollectionService"):GetInstanceAddedSignal("Door"))[1].Function
@@ -254,17 +264,24 @@ client.rocketworld.yousuck = (function() end)
 client.getnumactivec4 = getupvalue(client.c4.ShootBegin, 4)
 client.gethrowablesmokegrenade = getupvalue(require(game:GetService("ReplicatedStorage").Game.Item.SmokeGrenade).ShootBegin, 1)
 client.getnearestplayer = getupvalue(require(game:GetService("ReplicatedStorage").Home.HomeItem.Fabricate.Turret).setup, 12)
+client.motorupdatewheel = getupvalue(client.alexchassis2.UpdateHQ, 16)
 client.circleupdateui = getupvalue(client.circleac.Update, 1)
 
 client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
-client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 19).Classes
+client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 18).Classes
 client.ori.heliupdate = client.vclasses.Heli.Update
+client.ori.voltupdate = client.vclasses.Volt.Update
 client.ori.chassisupdate = client.vclasses.Chassis.UpdateEngine
 
 setreadonly(client.combatconst, isreadonly(client.combatconst) and false)
 setreadonly(client.militaryturretconst, isreadonly(client.militaryturretconst) and false)
 setreadonly(client.dogconst, isreadonly(client.dogconst) and false)
 setreadonly(client.rocketconsts, isreadonly(client.rocketconsts) and false)
+setconstant(client.motorupdatewheel, 17, "die")
+
+for i,v in next, client.ori do
+	client.ori[i] = clonefunction(v)
+end
 
 for i,v in next, getgc() do 
 	if type(v) == "function" and islclosure(v) then
@@ -306,7 +323,7 @@ for i,v in next, getgc() do
 				hookfunction(v, function()  end)
 			end
 		end
-		if getfenv(v).script == game:GetService("ReplicatedStorage").Std.Binder and infoname == "nil" then
+		if getfenv(v).script == game:GetService("ReplicatedStorage").Std.Binder and infoname == "" and getupvalues(v)[1] and type(getupvalues(v)[1]) == "table" then
 			local upvalue = getupvalue(v, 1) 
 			if typeof(upvalue) == "table" and upvalue._tagName == "BarbedWireClient" then
 				client.barbedwireclient = upvalue
@@ -320,6 +337,10 @@ for i,v in next, getconnections(game:GetService("RunService").Heartbeat) do
         if getconstants(v.Function)[13] == "Time/UI" then
             client.walkspeedfun = getupvalue(v.Function,6)
         end
+		if getconstants(v.Function)[4] == "LQVehicle Heartbeat" then
+			setconstant(v.Function, 27, "plzdie")
+			setconstant(v.Function, 28, "plzdie")
+		end
     end
 end
 
@@ -673,7 +694,6 @@ client.updateToOriginalChassisStats = (function()
 			gvp.TurnSpeed = stats.TurnSpeed
 		end
 	end
-
 end)
 
 client.changeHitboxRadius = (function(radius)
@@ -783,6 +803,20 @@ client.barbedwireloop = (function()
 	until configs.others.disablelaser == false
 end)
 
+client.opensewerhatch = (function()
+	for i,v in next, client.tagfuninstance do
+		if v["_DEBUG"] == "SewerHatch" then
+			v["Fun"]()
+		end
+	end
+end)
+
+client.oepnsewerloop = (function()
+	repeat task.wait(0.05) 
+		client.opensewerhatch()
+	until configs.others.opensewer == false
+end)
+
 client.dropall = (function()
 	for i,v in next, client.inventoryitemsystem.getInventoryItemsFor(game:GetService("Players").LocalPlayer) do
 		local ignore = {"Bag", "Crate", "Gem", "Taser", "Handcuffs", "RoadSpike", "MansionInvite"}
@@ -820,6 +854,8 @@ client.cellloop = (function()
 		client.openclosedcell()
 	until configs.player.nocwait == false
 end)
+
+
 
 task.spawn(function()
 	-- Hooking
@@ -955,6 +991,15 @@ task.spawn(function()
 			self.Velocity.Velocity *= Vector3.new(configs.vehicle.helienginesp,  configs.vehicle.heliverticalsp, configs.vehicle.helienginesp)
 			--self.Rotate.AngularVelocity *= Vector3.new(configs.vehicle.heliturnsp, configs.vehicle.heliturnsp, configs.vehicle.heliturnsp)
 		end
+	end)
+
+	client.vclasses.Volt.Update = (function(volt)
+		--Vector3.new(configs.vehicle.helienginesp, configs.vehicle.heliverticalsp, configs.vehicle.helienginesp)
+		client.ori.voltupdate(volt)
+		--if configs.vehicle.voltengine then
+			volt.Force.Force = volt.Force.Force * (1 + configs.vehicle.voltenginesp)
+			--self.Rotate.AngularVelocity *= Vector3.new(configs.vehicle.heliturnsp, configs.vehicle.heliturnsp, configs.vehicle.heliturnsp)
+		--end
 	end)
 
 	local blacklistedaction = {
@@ -1251,7 +1296,7 @@ AddToggle(group, "No Circle Hold", function(a)
 	setconstant(client.updateplayer, 38, a and 0 or 0.5)
 end)
 AddToggle(group, "Circle Anti Clipping", function(a)
-	setconstant(client.circleupdateui, 30, a and "Duration" or "NoRay")
+	setconstant(client.circleupdateui, 32, a and "Duration" or "NoRay")
 end)
 AddToggle(group, "No Roll Cooldown", function(a)
 	configs.player.norwait = a
@@ -1293,7 +1338,39 @@ end)
 
 local tab = Window:AddTab("Vehicle")
 
-local group = tab:AddLeftGroupbox("Car")
+local group = tab:AddLeftGroupbox("Utilities")
+AddSlider(group, "Flight Speed", function(a) 
+	configs.vehicle.fspeed = a
+end, 0, 0, 1000, 0)
+AddSlider(group, "Flight Rotation X", function(a) 
+	configs.vehicle.fx = a
+end, 0, 0, 360, 0)
+AddSlider(group, "Flight Rotation Y", function(a) 
+	configs.vehicle.fy = a
+end, 0, 0, 360, 0)
+AddSlider(group, "Flight Rotation Z", function(a) 
+	configs.vehicle.fz = a
+end, 0, 0, 360, 0)
+AddToggle(group, "Vehicle Flight", function(a)
+	configs.vehicle.ftog = a
+	if configs.vehicle.ftog and client.vehicleEntered == true then
+		client.launchVehicleFlight()
+	end
+end)
+AddToggle(group, "Infinite Nitro", function(a)
+	configs.vehicle.infnitro = a
+	if configs.vehicle.infnitro then
+		client.nitroLoop()
+	end
+end)
+AddToggle(group, "Anti Vehicle Hijack", function(a)
+	configs.vehicle.alwayshij = a
+	if configs.vehicle.alwayshij then
+		client.hijackLoop()
+	end
+end)
+
+local group = tab:AddRightGroupbox("Car")
 AddSlider(group, "Engine Speed", function(a) 
 	configs.vehicle.enginesp = a
 end, configs.vehicle.enginesp, 1, 200, 0)
@@ -1336,6 +1413,7 @@ end)
 AddToggle(group, "Instant Tow", function(a)
 	configs.vehicle.instanttow = a
 end)
+
 local group = tab:AddRightGroupbox("Helicopter")
 AddSlider(group, "Engine Forward Speed", function(a) 
 	configs.vehicle.helienginesp = a / 10
@@ -1356,37 +1434,35 @@ AddToggle(group, "Infinite Heli Height", function(a)
 	configs.vehicle.heliheight = a
 end)
 
-local group = tab:AddRightGroupbox("Utilities")
-AddSlider(group, "Flight Speed", function(a) 
-	configs.vehicle.fspeed = a
-end, 0, 0, 1000, 0)
-AddSlider(group, "Flight Rotation X", function(a) 
-	configs.vehicle.fx = a
-end, 0, 0, 360, 0)
-AddSlider(group, "Flight Rotation Y", function(a) 
-	configs.vehicle.fy = a
-end, 0, 0, 360, 0)
-AddSlider(group, "Flight Rotation Z", function(a) 
-	configs.vehicle.fz = a
-end, 0, 0, 360, 0)
-AddToggle(group, "Vehicle Flight", function(a)
-	configs.vehicle.ftog = a
-	if configs.vehicle.ftog and client.vehicleEntered == true then
-		client.launchVehicleFlight()
-	end
-end)
-AddToggle(group, "Infinite Nitro", function(a)
-	configs.vehicle.infnitro = a
-	if configs.vehicle.infnitro then
-		client.nitroLoop()
-	end
-end)
-AddToggle(group, "Anti Vehicle Hijack", function(a)
-	configs.vehicle.alwayshij = a
-	if configs.vehicle.alwayshij then
-		client.hijackLoop()
-	end
-end)
+local group = tab:AddRightGroupbox("Motorbike")
+AddSlider(group, "Speed Multiplier", function(a) 
+	setconstant(client.alexchassis2.UpdateHQ, 76, 1.2 + a)
+end, 0, 0, 100, 0)
+AddSlider(group, "Suspension Height Multiplier", function(a) 
+	setconstant(client.motorupdatewheel, 16, a)
+end, 0, 0, 50, 0)
+
+local group = tab:AddRightGroupbox("Tank")
+-- AddSlider(group, "Engine Speed Multiplier", function(a) 
+-- 	configs.vehicle.tankenginesp = a
+-- end, 0, 0, 500, 0)
+-- AddToggle(group, "Apply Engine Speed", function(a)
+-- 	print(configs.vehicle.tankenginesp)
+-- 	setconstant(getproto(client.tankbinder._handleSeatedDriver, 4), 20, tonumber(configs.vehicle.tankenginesp))
+-- 	print(getconstant(getproto(client.tankbinder._handleSeatedDriver, 4), 20))
+-- end)
+AddSlider(group, "Tracks Height", function(a) 
+	setconstant(client.tankbinder._buildWheelWorld, 28, 5.3 + a)
+end, 0, 0, 50, 0)
+
+local group = tab:AddRightGroupbox("Volt")
+AddSlider(group, "Speed Multiplier", function(a) 
+	configs.vehicle.voltenginesp = a
+end, 0, 0, 25, 0)
+AddSlider(group, "Wheel Height", function(a) 
+	setconstant(client.vclasses.Volt.VehicleEnter, 30, 6.5 + a)
+end, 0, 0, 19, 0)
+
 local tab = Window:AddTab("Combat")
 
 local group = tab:AddLeftGroupbox("Utilities")
@@ -1613,6 +1689,12 @@ AddToggle(group, "Open All Doors & Gates", function(a)
 	configs.others.opendoor = a
 	if a then
 		client.opendoorloop()
+	end
+end)
+AddToggle(group, "Open All Sewer Hatch", function(a)
+	configs.others.opensewer = a
+	if a then
+		client.oepnsewerloop()
 	end
 end)
 AddToggle(group, "Break Prison Elevator", function(a)
