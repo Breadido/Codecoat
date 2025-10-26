@@ -1,3 +1,8 @@
+--[[
+Core:
+	[~] Fixed Not Working
+]]
+
 -- i recommend yall to not seeing this shitty source, because most of these stuff is from old jb script which at the time that i'm still learning luau soo everything here is 1000% guranteed full of masterpiece of shitfest code
 local repo = 'https://raw.githubusercontent.com/mstudio45/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
@@ -213,6 +218,7 @@ local client = {
 	geomUtils = require(game:GetService("ReplicatedStorage"):WaitForChild("Std"):WaitForChild("GeomUtils"));
     vehiclelinkbinder = require(game:GetService("ReplicatedStorage").VehicleLink.VehicleLinkBinder);
 	duck = require(game:GetService("ReplicatedStorage").Game.Robbery.TombRobbery.TombRobberySystem).duck;
+	vehicleutils = require(game:GetService("ReplicatedStorage").Vehicle.VehicleUtils);
 	onvehicleentered = require(game:GetService("ReplicatedStorage").Vehicle.VehicleUtils).OnVehicleEntered;
 	onvehicleexited = require(game:GetService("ReplicatedStorage").Vehicle.VehicleUtils).OnVehicleExited;
 	onlocalitemequipped = require(game:GetService("ReplicatedStorage").Game.ItemSystem.ItemSystem).OnLocalItemEquipped;
@@ -268,7 +274,7 @@ client.motorupdatewheel = getupvalue(client.alexchassis2.UpdateHQ, 16)
 client.circleupdateui = getupvalue(client.circleac.Update, 1)
 
 client.rollratelimiter = getupvalue(client.movementrollservice.attemptRoll, 6)
-client.vclasses = getupvalue(client.alexchassis.UpdateEngine, 18).Classes
+client.vclasses = client.vehicleutils.Classes 
 client.ori.heliupdate = client.vclasses.Heli.Update
 client.ori.voltupdate = client.vclasses.Volt.Update
 client.ori.chassisupdate = client.vclasses.Chassis.UpdateEngine
@@ -1241,9 +1247,7 @@ local tab = Window:AddTab("Player")
 
 local group = tab:AddLeftGroupbox("Utilities")
 
-AddToggle(group, "Respawn At Death Location", function(a)
-	configs.player.respawndeathloc = a
-end)
+configs.player.respawndeathloc = false
 AddToggle(group, "Anti Ragdoll", function(a)
 	configs.player.norag = a
 	local hrp = game:GetService("Players").LocalPlayer.Character:WaitForChild("HumanoidRootPart") or nil
@@ -1748,3 +1752,13 @@ ThemeManager:ApplyToTab(tab)
 SaveManager:LoadAutoloadConfig()
 -- simple fixes for weapon camera lock not working cuz of linoria library having some guibutton modal turned on for some reason
 loadstring(game:HttpGet('https://pastebin.pl/view/raw/8e1e69d5'))() -- don't open the link
+--SaveManager:SetSubFolder('specific-place')
+--[[
+AddToggle(group, "", function(a)
+	print(a)
+end)
+AddSlider(group, "", function(a) 
+	
+end, default, min, max, round)
+
+]]
