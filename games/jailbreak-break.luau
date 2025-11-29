@@ -1407,6 +1407,9 @@ AddToggle(group, "Anti Tire Pop", function(a)
 end)
 AddToggle(group, "Drive On Water", function(a)
 	configs.vehicle.driveonwater = a
+	-- lazy fix
+	local a = require(game:GetService("ReplicatedStorage").Module.AlexChassis)
+	getupvalue(a.VehicleEnter, 17).IgnoreWater = a and false or true
 end)
 AddToggle(group, "Always Flip", function(a)
 	configs.vehicle.autoflip = a
