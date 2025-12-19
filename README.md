@@ -6,7 +6,7 @@
 
 **Codecoat** is a Roblox script hub project (mainly on jailbreak) that I've been working on for over 3 months. It’s designed to be:
 
-- ✅ **Free and open source**
+- ✅ **Free and open source(*except jailbreak is not open source sadly*)**
 - ⚡ **Lightweight but powerful**
 - 🧰 **Packed with rich features**
 - 🚀 **Expandable to support more games in the future**
