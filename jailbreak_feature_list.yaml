@@ -1,0 +1,202 @@
+Player Tab:
+	["Mechanics"] Section:
+		[+] Anti Ragdoll
+		[+] Anti Fall Damage
+		[+] Anti Skydiving
+		[+] Anti Ragdoll Stun
+		[+] Anti Crawling Slow
+		[+] Anti Injury Slow
+		[+] Anti Spotlight Slow
+		[+] Always Sprinting
+		[+] Enable Roll Action
+		[+] Anti Roll Cooldown
+		[+] Anti Punch Cooldown
+		[+] Always Punch
+		[+] Allow Equip While Crouching
+	
+	["Interactions"] Section:
+		[+] Anti Circle Hold
+		[+] Circle Anti Clipping
+		[+] Search Criminal Aura
+		[+] Pickpocket Aura
+		[+] Breakout Aura
+	
+	["Jetpack"] Section:
+		[+] Infinite Fuel
+		[+] Anti Eject Stun
+		[+] Anti Speed Limit
+
+	["Visuals"] Section:
+		[+] Break Your Back Bone
+	
+	["Movements"] Section:
+		[+] Flight Speed
+		[+] Character Flight
+
+Vehicle Tab:
+	["Traveling"] Section:
+		[+] Vehicle Flight Speed
+		[+] Vehicle Flight
+
+	["Nitro"] Section:
+		[+] Infinite Nitro
+
+	["Car"] Section:
+		[+] Engine Speed
+		[+] Apply Engine Speed
+		[+] Suspension Height
+		[+] Apply Suspension Height
+		[+] Turn Speed
+		[+] Apply Turn Speed
+		[+] Infinite Tire Health
+		[+] Elon Musk Autopilot
+		[+] Drive On Water
+		[+] Add Jump Action
+		[+] Anti Jump Action Wait
+		[+] Instant Tow
+	
+	["Heli"] Section:
+		[+] Engine Forward Speed
+		[+] Engine Vertical Speed
+		[+] Rope Hook Distance
+		[+] Instant Heli Pickup
+		[+] Anti Heli Down
+		[+] Infinite Heli Height
+
+	["Motorbike"] Section:
+		[+] Speed Multiplier
+		[+] Suspension Height Multiplier
+	
+	["Motorbike"] Section:
+		[+] Speed Multiplier
+		[+] Wheel Height
+
+	["Tank"] Section:
+		[+] Tracks Height
+
+Combat Tab:
+	["Projectiles"] Section:
+		[+] Always Auto
+		[+] Anti Recoil
+		[+] Anti Spread
+		[+] Anti Equip Time
+		[+] Instant Bullet Hit
+		[+] Increase Forcefield Damage
+		[+] Shoot Through Wall
+		[+] Shoot Through Forcefield
+		[+] Rocket Instant Seek
+		[+] Fast Taser
+		[+] Faster Forcefield Reload
+		[+] Anti Forcefield Misses
+		[+] Bandit Instant Kill
+
+	["Melee"] Section:
+		[+] Anti Reload Time
+		[+] Always Swoosh
+		[+] Always Lunge
+		[+] Disable Animations
+
+	["Explosives"] Section:
+		[+] Smoke Grenade Throw Speed
+		[+] C4 Throw Speed
+		[+] Grenade Throw Speed
+		[+] Grenade Fuse Time
+		[+] Anti Throw Cooldown
+
+	["Consumables"] Section:
+		[+] Infinite Juice Consume
+		[+] Instant Donut Consume
+
+	["Car Turret"] Section:
+		[+] Follow Mouse
+		[+] Anti Overheat
+		[+] Fast Bullet
+
+	["Silent Aim"] Section:
+		[+] Enable Silent Aim
+		[+] Include Taser
+		[+] Include Plasma
+		[+] Include Car Turret
+		[+] Include Rocket Launcher
+		[+] Include C4
+		[+] FOV Circle
+		[+] Radius
+	
+	["Handcuffs"] Section:
+		[+] Arrest Aura
+		[+] Eject Aura
+
+Others Tab:
+	["Protections"] Section:
+		[+] Disable Robberies Lasers
+		[+] Disable Bandit Damage
+		[+] Disable Home Turret
+		[+] Automatic Solve Puzzle
+
+	["Millitary Base"] Section:
+		[+] Disable Millitary Turret
+		[+] Disable Forcefield
+
+	["Minimap"] Section:
+		[+] Anti Point Flash
+
+	["Oil Rig"] Section:
+		[+] Disable Laser Turret
+		[+] Automatic Place TNT
+		[+] Automatic Grab Keycard
+
+	["Tomb"] Section:
+		[+] Disable Spikes
+		[+] Disable Darts
+		[+] Disable Wood Damage
+
+	["Mansion"] Section:
+		[+] Bandit Walk To Boss
+		[+] Bandit Target Boss
+		[+] Disable Traps
+
+	["Casino"] Section:
+		[+] Automatic Hack Computer
+		[+] Automatic Grab Money
+		[+] Automatic Open Keypad Door
+
+	["Museum"] Section:
+		[+] Automatic Grab Valuable
+		[+] Disable Spotlight Damage
+
+	["Jewelry"] Section:
+		[+] Automatic Grab Jewel
+	
+	["Bank"] Section:
+		[+] Automatic Place Dynamite
+
+	["Cargo Ship"] Section:
+		[+] Disable Rocket Turret
+
+	["Power Plant"] Section:
+		[+] Disable Piston Damage
+
+	["Cargo Train"] Section:
+		[+] Automatic Open Vault
+
+	["Passenger Train"] Section:
+		[+] Grab Train Valuable
+	
+Visual Tab:
+	["ESP Options"] Section:
+		[+] Enabled
+		[+] Box
+		[+] Tracer
+		[+] Name
+		[+] Distance
+		[+] Bounties
+		[+] Health
+		[+] Skeleton
+	
+	["ESP Settings"] Section:
+		[+] Team Check
+		[+] Use Team Color
+		[+] Rainbow
+		[+] Text Outline
+		[+] Text Size
+		[+] Tracer Origins
