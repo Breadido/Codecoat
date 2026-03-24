@@ -11,5 +11,5 @@ end)
 if ok then
     print("[Codecoat] Loaded:", file)
 else
-    warn("[Codecoat] Failed:", huh)
+    game:GetService("Players").LocalPlayer:Kick("[Codecoat] Failed:", huh)
 end
