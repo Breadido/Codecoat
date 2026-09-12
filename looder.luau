@@ -4,6 +4,7 @@ local uh = {
     [17190407811] = "games/rewrite.luau",
     [17516596118] = "games/hypershot.lua",
     [77843161404023] = "games/runarestaurant.luau",
+    [3351674303] = "games/drivingempire.luau",
 }
 local file = uh[game.PlaceId]
 local ok, huh = pcall(function()
